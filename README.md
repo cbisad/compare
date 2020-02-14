@@ -7,4 +7,4 @@ For Python, a dictionnary is used to start node IP and role type to be used with
 2) The second step is connecting via SSH to each of the node and collecting some information defined in the ssh_commands variable.
 3) The third and last step is comparing the datas between each node type.
 
-The script needs to be run from Undercloud and will create its datas into /tmp directory.
+The script needs to be run from Undercloud and will create its datas into /tmp directory. 
