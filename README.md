@@ -1,6 +1,6 @@
 Scripts comparing OpenStack packages version as well as docker container version between OpenStack nodes as well as between 2 sites running Red Hat OpenStack.
 
-compare_packages.sh/compare_packages.py
+** compare_packages.sh/compare_packages.py **
 
 For Bash, Arrays are used to start node IP and role type to be used within loops.
 For Python, a dictionnary is used to start node IP and role type to be used within loops.
