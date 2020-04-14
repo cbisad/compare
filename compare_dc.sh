@@ -12,16 +12,13 @@ dc2_input_file=${dc2_path}ip-nodeflavor.txt
 dc1_report_file=${dc1_path}dc-diff-report.txt
 
 #Each type of node needs an array to store its IP and Flavor
-arrays="IP_NodeFlavor_Array Controller_IP_array Compute_0_IP_array Compute_1_IP_array Compute_2_IP_array CephStorage_0_IP_array CephStorage_1_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
+arrays="IP_NodeFlavor_Array Controller_IP_array Compute_0_IP_array CephStorage_0_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
 
 #Each type of node needs its OpenStack Flavor
 openstack_director=Director
 openstack_controller=Controller
 openstack_compute_0=ComputeDpdkHw0
-openstack_compute_1=ComputeDpdk10Hw0
-openstack_compute_2=ComputeDpdk11Hw0
 openstack_storage_0=CephStorage10Hw5
-openstack_storage_1=CephStorage11Hw5
 contrail_appformix=AppformixController
 contrail_controller=ContrailController
 contrail_analytics_db=ContrailAnalyticsDatabase
@@ -47,18 +44,9 @@ do IP_NodeFlavor_Array=($file_line); declare IP_NodeFlavor_Array;
                 "$openstack_compute_0")
                               if [ ${Compute_0_IP_array[0]} = "init" ]; then
                                 Compute_0_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
-                "$openstack_compute_1")
-                              if [ ${Compute_1_IP_array[0]} = "init" ]; then
-                                Compute_1_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
-                "$openstack_compute_2")
-                              if [ ${Compute_2_IP_array[0]} = "init" ]; then
-                                Compute_2_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
                 "$openstack_storage_0")
                               if [ ${CephStorage_0_IP_array[0]} = "init" ]; then
                                 CephStorage_0_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
-                "$openstack_storage_1")
-                              if [ ${CephStorage_1_IP_array[0]} = "init" ]; then
-                                CephStorage_1_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
                 "$contrail_appformix")
                               if [ ${AppformixController_IP_array[0]} = "init" ]; then
                                 AppformixController_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
@@ -92,14 +80,8 @@ echo '*****' Node: ${IP_NodeFlavor_Array[0]} ${IP_NodeFlavor_Array[1]} '*****' >
                               diff $dc2_path${IP_NodeFlavor_Array[1]}-${Controller_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
                 "$openstack_compute_0")
                               diff $dc2_path${IP_NodeFlavor_Array[1]}-${Compute_0_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
-                "$openstack_compute_1")
-                              diff $dc2_path${IP_NodeFlavor_Array[1]}-${Compute_1_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
-                "$openstack_compute_2")
-                              diff $dc2_path${IP_NodeFlavor_Array[1]}-${Compute_2_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
                 "$openstack_storage_0")
                               diff $dc2_path${IP_NodeFlavor_Array[1]}-${CephStorage_0_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
-                "$openstack_storage_1")
-                              diff $dc2_path${IP_NodeFlavor_Array[1]}-${CephStorage_1_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
                 "$contrail_appformix")
                               diff $dc2_path${IP_NodeFlavor_Array[1]}-${AppformixController_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
                 "$contrail_controller")
