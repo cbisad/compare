@@ -5,6 +5,7 @@ Scripts comparing OpenStack packages version as well as docker container version
 * For Bash, Arrays are used to start node IP and role type to be used within loops.
 * For Python, a dictionnary is used to start node IP and role type to be used within loops.
 
+Steps:
 1) The first step is collecting the node details, this could be changed easily for environments not on OpenStack.
 2) The second step is connecting via SSH to each of the node and collecting some information defined in the ssh_commands variable.
 3) The third and last step is comparing the datas between each node type.
@@ -17,7 +18,7 @@ After that, 2 DCs can be compared together (it will be needed to copy the files 
 * dc1
 * dc2
 
-# 3/File structure:
+# 3/File structure
 ```
 (undercloud) [stack@undercloud dc1]$ cat Director-127.0.0.1
 ansible-2.6.19-1.el7ae.noarch
