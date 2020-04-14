@@ -2,21 +2,23 @@ Scripts comparing OpenStack packages version as well as docker container version
 
 # 1/compare_packages
 
-* For Bash, Arrays are used to start node IP and role type to be used within loops.
-* For Python, a dictionnary is used to start node IP and role type to be used within loops.
+* For Bash, Arrays are used to start node IP and role flavor to be used within loops.
+* For Python, a dictionnary is used to start node IP and role flavor to be used within loops.
 
 Steps:
 1) The first step is collecting the node details, this could be changed easily for environments not on OpenStack.
 2) The second step is connecting via SSH to each of the node and collecting some information defined in the ssh_commands variable.
-3) The third and last step is comparing the datas between each node type.
+3) The third and last step is comparing the datas between each node flavor.
 
 The script needs to be run from Undercloud and will create its datas into /tmp directory. 
 
 # 2/compare_dc
 
-After that, 2 DCs can be compared together (it will be needed to copy the files of the comparison to a single point):
-* dc1
-* dc2
+After that, 2 DCs can be compared together (it will be needed to copy the files of the comparison to a single point).
+
+Steps:
+1) The first step is creating a reference node for each flavor using dc2 nodes.
+2) The second step is comparing dc1 with dc2 reference nodes.
 
 # 3/File structure
 ```
