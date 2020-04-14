@@ -1,11 +1,10 @@
-#Script to compare OpenStack packages as well as Docker container versions
-#Needs to be run from Undercloud
+#Script to compare OpenStack nodes per type
+#a. Check the variables to make sure they match the environment
+#b. Run the script from Undercloud/Director as stack user
 
 #Modules
 #For SSH access
-import base64
-import paramiko
-import sys
+import base64, paramiko ,sys 
 #To get output
 import subprocess
 #To compare files
@@ -14,12 +13,23 @@ import difflib
 import os
 
 #Variables
+dc_path='/tmp/dc/'
+report_file=dc_path+'diff-report.txt'
+input_file=dc_path+'ip-nodeflavor.txt'
 node_user = 'heat-admin'
-getnodeinfo_cmd = "source /home/stack/stackrc && openstack server list | awk '{print $8, $12}' | awk -F= '{print $2}' | awk '!/^$/'"
-ssh_command = "rpm -qa | grep openstack | sort && sudo docker ps --format '{{.Image}}' | sort "
-report_file = "/tmp/report_file.txt"
+getnodeinfo_cmd = "source /home/stack/stackrc && openstack server list | awk '{print $8, $12}' | awk -F= '{print $2}' | awk '!/^$/' "
+ssh_command = " rpm -qa | grep -E 'appformix*|ceph*|container*|contrail*|corosync*|docker*|galera*|haproxy*|hiera*|ipa*|kernel*|mariadb*|memcached*|openstack*|openvswitch*|pacemaker*|pcs*|postgresql*|puppet*|python*' & sudo docker ps --format '{{.Image}}' "
 #Init dictionnary and node type variables
 nodes_datas_dict = {}
+#Each type of node needs its OpenStack Flavor
+openstack_director='Director'
+openstack_controller='Controller'
+openstack_compute_0='ComputeDpdkHw0'
+openstack_storage_0='CephStorage10Hw5'
+contrail_appformix='AppformixController'
+contrail_controller='ContrailController'
+contrail_analytics_db='ContrailAnalyticsDatabase'
+contrail_analytics='ContrailAnalytics'
 
 #Functions
 def get_nodes_datas(getnodeinfo_cmd):
@@ -27,76 +37,94 @@ def get_nodes_datas(getnodeinfo_cmd):
   for line in iter(ps.stdout.readline,''):
     n_ip, n_type = line.split()
     nodes_datas_dict[n_ip] = n_type
-
+	
 def ssh_connection(node_ip, node_user):
   ssh_cnx = paramiko.SSHClient()
   ssh_cnx.set_missing_host_key_policy(paramiko.AutoAddPolicy())
   ssh_cnx.connect(node_ip, username=node_user)
   return ssh_cnx
 
-def get_ssh_datas(ssh_cnx, node_ip, node_role, ssh_command):
-  datafile = open('/tmp/' + node_role + '-' + node_ip, 'w+')
+def get_ssh_datas(ssh_cnx, node_ip, node_flavor, ssh_command):
+  os.makedirs(dc_path)
+  datafile = open(dc_path + node_flavor + '-' + node_ip, 'w+')
   stdin_, stdout_, stderr_ = ssh_cnx.exec_command(ssh_command)
   lines = stdout_.readlines()
   for line in lines:
     datafile.write(line)
   datafile.close()
 
-def cmp_nodes(report_file, node_ref, node_ip, node_role):
+def cmp_nodes(report_file, node_ref, node_ip, node_flavor):
   reportfile = open( report_file, 'a')
-  print >> reportfile, ("*****"),node_ip,node_role,("*****")
-  with open('/tmp/' + node_role + '-' + node_ref, 'r') as file1:
-    with open('/tmp/' + node_role + '-' + node_ip, 'r') as file2:
-      diff = difflib.unified_diff(file1.readlines(), file2.readlines(), fromfile='file1', tofile='file2',)
+  print >> reportfile, ("*****"),node_ip,node_flavor,("*****")
+  with open(dc_path + node_flavor + '-' + node_ref, 'r') as file1:
+    with open(dc_path + node_flavor + '-' + node_ip, 'r') as file2:
+      diff = difflib.unified_diff(file1.readlines(), file2.readlines(), fromfile='file1', tofile='file2',n=1)
       for line in diff:
         reportfile.write(line)
   reportfile.close()
 
 #Calls
 def main ():
-  #Get node datas from Undercloud
-  get_nodes_datas(getnodeinfo_cmd)
-  #SSH connect to each node and collect data from "ssh_command"
-  for nodeip, noderole in nodes_datas_dict.iteritems():
-    ssh_cnx_rtrn = ssh_connection (nodeip, node_user)
-    get_ssh_datas(ssh_cnx_rtrn, nodeip, noderole, ssh_command)
+
   #Delete any existing report file
   os.remove(report_file) if os.path.exists(report_file) else None
-  #Case like loop to compare each node per type
+
+  print '1.Collect IP and Flavor information from Undercloud'
+  get_nodes_datas(getnodeinfo_cmd)
+
+  print '2.Collect datas from each node'
+  for nodeip, nodeflavor in nodes_datas_dict.iteritems():
+    ssh_cnx_rtrn = ssh_connection (nodeip, node_user)
+    get_ssh_datas(ssh_cnx_rtrn, nodeip, nodeflavor, ssh_command)
+
+  #Add director (useful when comparing DCs)
+  subprocess.Popen('rpm -qa | sort',shell=True,stdout=open(dc_path + 'Director-127.0.0.1','w'))  
+  nodes_datas_dict['127.0.0.1']='Director'
+  #Copy dict to a file (useful when comparing DCs)
+  backup_dict = open (input_file,'w')
+  backup_dict.write( str(nodes_datas_dict.txt) )
+  backup_dict.close()
+
+  print '3.Comparing datas between node flavors'
   #Init node reference variable
-  node_Controller_ref = node_ComputeDpdkHw0_ref = node_CephStorageHw10_ref = node_AppformixController_ref = node_ContrailController_ref = node_ContrailAnalyticsDatabase_ref = node_ContrailAnalytics_ref = 'init'
-  for nodeip, noderole in nodes_datas_dict.iteritems():
-    if noderole == "Controller":
-      if node_Controller_ref == 'init':
-        node_Controller_ref = nodeip
-      cmp_nodes(report_file, node_Controller_ref, nodeip, noderole)
-    elif noderole == "ComputeDpdkHw0":
-      if node_ComputeDpdkHw0_ref == 'init':
-        node_ComputeDpdkHw0_ref = nodeip
-      cmp_nodes(report_file, node_ComputeDpdkHw0_ref, nodeip, noderole)
-    elif noderole == "CephStorageHw10":
-      if node_CephStorageHw10_ref == 'init':
-        node_CephStorageHw10_ref = nodeip
-      cmp_nodes(report_file, node_CephStorageHw10_ref, nodeip, noderole)
-    elif noderole == "AppformixController":
-      if node_AppformixController_ref == 'init':
-        node_AppformixController_ref = nodeip
-      cmp_nodes(report_file, node_AppformixController_ref, nodeip, noderole)
-    elif noderole == "ContrailController":
-      if node_ContrailController_ref == 'init':
-        node_ContrailController_ref = nodeip
-      cmp_nodes(report_file, node_ContrailController_ref, nodeip, noderole)
-    elif noderole == "ContrailAnalyticsDatabase":
-      if node_ContrailAnalyticsDatabase_ref == 'init':
-        node_ContrailAnalyticsDatabase_ref = nodeip
-      cmp_nodes(report_file, node_ContrailAnalyticsDatabase_ref, nodeip, noderole)
-    elif noderole == "ContrailAnalytics":
-      if node_ContrailAnalytics_ref == 'init':
-        node_ContrailAnalytics_ref = nodeip
-      cmp_nodes(report_file, node_ContrailAnalytics_ref, nodeip, noderole)
+  openstack_director_ref = openstack_controller_ref = openstack_compute_0_ref = openstack_storage_0_ref = contrail_appformix_ref = contrail_controller_ref = contrail_analytics_db_ref = contrail_analytics_ref = 'init'
+  #Case like loop to compare each node per type
+  for nodeip, nodeflavor in nodes_datas_dict.iteritems():
+    if nodeflavor == openstack_director:
+      if openstack_director_ref == 'init':
+        openstack_director_ref = nodeip
+      cmp_nodes(report_file, openstack_director_ref, nodeip, nodeflavor)
+    elif nodeflavor == openstack_controller:
+      if openstack_controller_ref == 'init':
+        openstack_controller_ref = nodeip
+      cmp_nodes(report_file, openstack_controller_ref, nodeip, nodeflavor)
+    elif nodeflavor == openstack_compute_0:
+      if openstack_compute_0_ref == 'init':
+        openstack_compute_0_ref = nodeip
+      cmp_nodes(report_file, openstack_compute_0_ref, nodeip, nodeflavor)
+    elif nodeflavor == openstack_storage_0:
+      if openstack_storage_0_ref == 'init':
+        openstack_storage_0_ref = nodeip
+      cmp_nodes(report_file, openstack_storage_0_ref, nodeip, nodeflavor)
+    elif nodeflavor == contrail_appformix:
+      if contrail_appformix_ref == 'init':
+        contrail_appformix_ref = nodeip
+      cmp_nodes(report_file, contrail_appformix_ref, nodeip, nodeflavor)
+    elif nodeflavor == contrail_controller:
+      if contrail_controller_ref == 'init':
+        contrail_controller_ref = nodeip
+      cmp_nodes(report_file, contrail_controller_ref, nodeip, nodeflavor)
+    elif nodeflavor == contrail_analytics_db:
+      if contrail_analytics_db_ref == 'init':
+        contrail_analytics_db_ref = nodeip
+      cmp_nodes(report_file, contrail_analytics_db_ref, nodeip, nodeflavor)
+    elif nodeflavor == contrail_analytics:
+      if contrail_analytics_ref == 'init':
+        contrail_analytics_ref = nodeip
+      cmp_nodes(report_file, contrail_analytics_ref, nodeip, nodeflavor)
     else: 
-      print("Incorrect Role")
-  print "Report file available in:", report_file
+      print("Node comparison failed, check the node flavors: "), nodeip
+  print "Report can be found here:", report_file
 
 if __name__ == "__main__":
     main()
