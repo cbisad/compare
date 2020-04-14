@@ -58,7 +58,7 @@ python:
 (undercloud) [stack@undercloud dc1]$ cat ip-nodeflavor.txt
 {'192.168.11.72': 'ComputeDpdkHw0', '192.168.11.71': 'ComputeDpdkHw0', '127.0.0.1': 'Director', '192.168.11.10': 'Controller'}
 
-
+```
 (undercloud) [stack@undercloud dc1]$ cat dc-diff-report.txt
 ***** 192.168.11.72 ComputeDpdkHw0 *****
 ***** 192.168.11.71 ComputeDpdkHw0 *****
@@ -69,3 +69,4 @@ python:
 @@ -1,2 +1 @@
 -192.168.11.5:8787/rhosp13/openstack-neutron-dhcp-agent:13.0-101
  192.168.11.5:8787/rhosp13/openstack-neutron-dhcp-agent:13.0-101
+```
