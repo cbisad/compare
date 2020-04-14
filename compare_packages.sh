@@ -1,6 +1,6 @@
 #Script to compare OpenStack nodes per type
-#a. Run the script from Undercloud/Director as stack user
-#b. Check the variables to make sure they match the environment
+#a. Check the variables to make sure they match the environment
+#b. Run the script from Undercloud/Director as stack user
 
 #Variables
 dc_path='/tmp/dc/'
@@ -12,15 +12,12 @@ openstack_user='heat-admin'
 ssh_commands=" rpm -qa | grep -E 'appformix*|ceph*|container*|contrail*|corosync*|docker*|galera*|haproxy*|hiera*|ipa*|kernel*|mariadb*|memcached*|openstack*|openvswitch*|pacemaker*|pcs*|postgresql*|puppet*|python*' & sudo docker ps --format '{{.Image}}' "
 
 #Each type of node needs an array to store its IP and Flavor
-arrays="IP_NodeFlavor_Array Controller_IP_array Compute_0_IP_array Compute_1_IP_array Compute_2_IP_array CephStorage_0_IP_array CephStorage_1_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
+arrays="IP_NodeFlavor_Array Controller_IP_array Compute_0_IP_array CephStorage_0_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
 
 #Each type of node needs its OpenStack Flavor
 openstack_controller=Controller
 openstack_compute_0=ComputeDpdkHw0
-openstack_compute_1=ComputeDpdk10Hw0
-openstack_compute_2=ComputeDpdk11Hw0
 openstack_storage_0=CephStorage10Hw5
-openstack_storage_1=CephStorage11Hw5
 contrail_appformix=AppformixController
 contrail_controller=ContrailController
 contrail_analytics_db=ContrailAnalyticsDatabase
@@ -91,7 +88,7 @@ echo '*****' Node: ${IP_NodeFlavor_Array[0]} ${IP_NodeFlavor_Array[1]} '*****' >
                               if [ ${ContrailAnalytics_IP_array[0]} = "init" ]; then
                                 ContrailAnalytics_IP_array=${IP_NodeFlavor_Array[0]}; fi
                               diff $dc_path${IP_NodeFlavor_Array[1]}-${ContrailAnalytics_IP_array[0]} $dc_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $report_file ;;
-                *) echo "Node comparison failed, check the node flavors"
+                *) echo "Node comparison failed, check the node flavors: " ${IP_NodeFlavor_Array[0]}
                    exit 1 ;;
         esac
 done < $input_file
