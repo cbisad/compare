@@ -42,8 +42,8 @@ python-ncclient-0.4.7-5.el7ost.noarch
 pacemaker-remote-1.1.20-5.el7_7.1.x86_64
 python-ncclient-0.4.7-5.el7ost.noarch
 ```
-```
 bash:
+```
 (undercloud) [stack@undercloud dc1]$ cat ip-nodeflavor.txt
 192.168.11.72 ComputeDpdkHw0
 192.168.11.71 ComputeDpdkHw0
@@ -53,8 +53,8 @@ bash:
 ```
 (undercloud) [stack@undercloud dc1]$ cat dc-diff-report.txt
 ```
-```
 python:
+```
 (undercloud) [stack@undercloud dc1]$ cat ip-nodeflavor.txt
 {'192.168.11.72': 'ComputeDpdkHw0', '192.168.11.71': 'ComputeDpdkHw0', '127.0.0.1': 'Director', '192.168.11.10': 'Controller'}
 ```
