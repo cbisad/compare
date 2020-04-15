@@ -45,7 +45,13 @@ def ssh_connection(node_ip, node_user):
   return ssh_cnx
 
 def get_ssh_datas(ssh_cnx, node_ip, node_flavor, ssh_command):
-  os.makedirs(dc_path)
+  #Checking if directory already exists
+  try:
+    if not os.path.exists(os.path.dirname(dc_path)):
+       os.makedirs(os.path.dirname(dc_path))
+  except OSError as err:
+   print(err)
+  #Open node data files and write into them
   datafile = open(dc_path + node_flavor + '-' + node_ip, 'w+')
   stdin_, stdout_, stderr_ = ssh_cnx.exec_command(ssh_command)
   lines = stdout_.readlines()
@@ -82,7 +88,7 @@ def main ():
   nodes_datas_dict['127.0.0.1']='Director'
   #Copy dict to a file (useful when comparing DCs)
   backup_dict = open (input_file,'w')
-  backup_dict.write( str(nodes_datas_dict.txt) )
+  backup_dict.write( str(nodes_datas_dict) )
   backup_dict.close()
 
   print '3.Comparing datas between node flavors'
