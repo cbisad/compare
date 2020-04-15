@@ -33,6 +33,9 @@ contrail_analytics='ContrailAnalytics'
 
 #Functions
 def get_nodes_datas(getnodeinfo_cmd):
+  #Delete any existing report file
+  os.remove(report_file) if os.path.exists(report_file) else None
+  #Get node IP and Flavor datas from OpenStack command output
   ps = subprocess.Popen(getnodeinfo_cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
   for line in iter(ps.stdout.readline,''):
     n_ip, n_type = line.split()
@@ -59,6 +62,15 @@ def get_ssh_datas(ssh_cnx, node_ip, node_flavor, ssh_command):
     datafile.write(line)
   datafile.close()
 
+def dict_update_export():
+  #Add director node data file (useful when comparing DCs)
+  subprocess.Popen('rpm -qa | sort',shell=True,stdout=open(dc_path + 'Director-127.0.0.1','w'))
+  nodes_datas_dict['127.0.0.1']='Director'
+  #Export dict to a file (useful when comparing DCs)
+  backup_dict = open (input_file,'w')
+  backup_dict.write( str(nodes_datas_dict) )
+  backup_dict.close()
+
 def cmp_nodes(report_file, node_ref, node_ip, node_flavor):
   reportfile = open( report_file, 'a')
   print >> reportfile, ("*****"),node_ip,node_flavor,("*****")
@@ -72,9 +84,6 @@ def cmp_nodes(report_file, node_ref, node_ip, node_flavor):
 #Calls
 def main ():
 
-  #Delete any existing report file
-  os.remove(report_file) if os.path.exists(report_file) else None
-
   print '1.Collect IP and Flavor information from Undercloud'
   get_nodes_datas(getnodeinfo_cmd)
 
@@ -83,15 +92,10 @@ def main ():
     ssh_cnx_rtrn = ssh_connection (nodeip, node_user)
     get_ssh_datas(ssh_cnx_rtrn, nodeip, nodeflavor, ssh_command)
 
-  #Add director (useful when comparing DCs)
-  subprocess.Popen('rpm -qa | sort',shell=True,stdout=open(dc_path + 'Director-127.0.0.1','w'))  
-  nodes_datas_dict['127.0.0.1']='Director'
-  #Copy dict to a file (useful when comparing DCs)
-  backup_dict = open (input_file,'w')
-  backup_dict.write( str(nodes_datas_dict) )
-  backup_dict.close()
+  print '3.Add Director and export node IP and Flavor datas'
+  dict_update_export()
 
-  print '3.Comparing datas between node flavors'
+  print '4.Comparing datas between node flavors'
   #Init node reference variable
   openstack_director_ref = openstack_controller_ref = openstack_compute_0_ref = openstack_storage_0_ref = contrail_appformix_ref = contrail_controller_ref = contrail_analytics_db_ref = contrail_analytics_ref = 'init'
   #Case like loop to compare each node per type
