@@ -55,6 +55,15 @@ bash:
 ```
 ```
 (undercloud) [stack@undercloud dc1]$ cat dc-diff-report.txt
+***** Node: 192.168.11.10 baremetal *****
+***** Node: 192.168.11.71 baremetal *****
+1,9c1
+< 192.168.11.5:8787/rhosp13/openstack-aodh-api:13.0-94
+...
+707d654
+< registry.access.redhat.com/rhosp13/openstack-cinder-backup:pcmklatest
+***** Node: 192.168.11.72 baremetal-extra *****
+***** Node: 127.0.0.1 Director *****
 ```
 python:
 ```
