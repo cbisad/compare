@@ -20,7 +20,7 @@ Steps:
 1) The first step is creating a reference node for each flavor using dc2 nodes.
 2) The second step is comparing dc1 with dc2 reference nodes.
 
-# 3/File structure
+# 3/File structures
 ```
 (undercloud) [stack@undercloud dc1]$ cat Director-127.0.0.1
 ansible-2.6.19-1.el7ae.noarch
