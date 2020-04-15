@@ -12,7 +12,7 @@ dc2_input_file=${dc2_path}ip-nodeflavor.txt
 dc1_report_file=${dc1_path}dc-diff-report.txt
 
 #Each type of node needs an array to store its IP and Flavor
-arrays="IP_NodeFlavor_Array Controller_IP_array Compute_0_IP_array CephStorage_0_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
+arrays="IP_NodeFlavor_Array Director_IP_array Controller_IP_array Compute_0_IP_array CephStorage_0_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
 
 #Each type of node needs its OpenStack Flavor
 openstack_director=Director
@@ -37,8 +37,11 @@ while read file_line;
 do IP_NodeFlavor_Array=($file_line); declare IP_NodeFlavor_Array;
         # case 
         case ${IP_NodeFlavor_Array[1]} in
-                "$openstack_controller") 
+                "$openstack_director")
                               # Check if the variable has been used already, if not, will initilize it with the first node IP within the Flavor
+                              if [ ${Director_IP_array[0]} = "init" ]; then
+                                Director_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
+                "$openstack_controller") 
                               if [ ${Controller_IP_array[0]} = "init" ]; then
                                 Controller_IP_array=${IP_NodeFlavor_Array[0]}; fi ;;
                 "$openstack_compute_0")
@@ -63,7 +66,6 @@ do IP_NodeFlavor_Array=($file_line); declare IP_NodeFlavor_Array;
                    exit 1 ;;
         esac
 done < $dc2_input_file
-echo '1.DONE'
 
 
 ###2.Loop going through the list of IPs/NodeFlavor and comparing the NodeFlavor-IP files from DC1 to DC2 reference node
@@ -74,8 +76,7 @@ echo '*****' Node: ${IP_NodeFlavor_Array[0]} ${IP_NodeFlavor_Array[1]} '*****' >
         # case to split node per type and compare datas with the first node of the list only
         case ${IP_NodeFlavor_Array[1]} in
                 "$openstack_director")
-				              #Director will always have the same value as defined in compare_packages.sh
-                              diff ${dc2_path}Director-127.0.0.1 ${dc1_path}Director-127.0.0.1 >> $dc1_report_file ;;
+                              diff $dc2_path${IP_NodeFlavor_Array[1]}-${Director_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
                 "$openstack_controller") 
                               diff $dc2_path${IP_NodeFlavor_Array[1]}-${Controller_IP_array[0]} $dc1_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $dc1_report_file ;;
                 "$openstack_compute_0")
@@ -94,5 +95,4 @@ echo '*****' Node: ${IP_NodeFlavor_Array[0]} ${IP_NodeFlavor_Array[1]} '*****' >
                    exit 1 ;;
         esac
 done < $dc1_input_file
-echo '2.DONE'
 echo "Report can be found here:" $dc1_report_file
