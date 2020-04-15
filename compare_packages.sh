@@ -12,11 +12,12 @@ openstack_user='heat-admin'
 ssh_commands=" rpm -qa | grep -E 'appformix*|ceph*|container*|contrail*|corosync*|docker*|galera*|haproxy*|hiera*|ipa*|kernel*|mariadb*|memcached*|openstack*|openvswitch*|pacemaker*|pcs*|postgresql*|puppet*|python*' & sudo docker ps --format '{{.Image}}' "
 
 #Each type of node needs an array to store its IP and Flavor
-arrays="IP_NodeFlavor_Array Controller_IP_array Compute_0_IP_array CephStorage_0_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
+arrays="IP_NodeFlavor_Array Director_IP_array Controller_IP_array Compute_0_IP_array CephStorage_0_IP_array AppformixController_IP_array ContrailController_IP_array ContrailAnalyticsDatabase_IP_array ContrailAnalytics_IP_array"
 
 #Each type of node needs its OpenStack Flavor
-openstack_controller=Controller
-openstack_compute_0=ComputeDpdkHw0
+openstack_director=Director
+openstack_controller=baremetal
+openstack_compute_0=baremetal-extra
 openstack_storage_0=CephStorage10Hw5
 contrail_appformix=AppformixController
 contrail_controller=ContrailController
@@ -37,7 +38,6 @@ mkdir -p $dc_path
 source $openstack_stackrc
 openstack server list | awk '{print $8, $12}' | awk -F= '{print $2}' | awk '!/^$/' >> $input_file
 sort -k2 $input_file > $buffer_file; cp $buffer_file $input_file
-echo '1.DONE'
 
 
 #2.SSH to each node, collect datas, copy them locally in <Flavor>-<IP> filename and sort the datas to make the comparison output easier to read
@@ -49,7 +49,6 @@ sort $dc_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} > $buffer_file;
 done < $input_file
 #Add director (useful when comparing DCs)
 rpm -qa | sort > ${dc_path}Director-127.0.0.1 && echo "127.0.0.1 Director" >> $input_file
-echo '2.DONE'
 
 
 #3.Loop going through the list of IPs/Flavor and comparing the <Flavor>-<IP> files
@@ -59,6 +58,11 @@ do IP_NodeFlavor_Array=($file_line); declare IP_NodeFlavor_Array;
 echo '*****' Node: ${IP_NodeFlavor_Array[0]} ${IP_NodeFlavor_Array[1]} '*****' >> $report_file
         # case to split node per flavor and compare datas with the first node of the list only (reference node)
         case ${IP_NodeFlavor_Array[1]} in
+                "$openstack_director")
+                              # Check if the variable has been used already, if not, will initilize it with the first node IP of the list to compare against other nodes with the same flavor
+                              if [ ${Director_IP_array[0]} = "init" ]; then
+                                Director_IP_array=${IP_NodeFlavor_Array[0]}; fi
+                              diff $dc_path${IP_NodeFlavor_Array[1]}-${Director_IP_array[0]} $dc_path${IP_NodeFlavor_Array[1]}-${IP_NodeFlavor_Array[0]} >> $report_file ;;
                 "$openstack_controller") 
                               # Check if the variable has been used already, if not, will initilize it with the first node IP of the list to compare against other nodes with the same flavor
                               if [ ${Controller_IP_array[0]} = "init" ]; then
@@ -92,5 +96,4 @@ echo '*****' Node: ${IP_NodeFlavor_Array[0]} ${IP_NodeFlavor_Array[1]} '*****' >
                    exit 1 ;;
         esac
 done < $input_file
-echo '3.DONE'
 echo "Report can be found here:" $report_file
