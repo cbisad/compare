@@ -27,6 +27,9 @@ contrail_appformix='AppformixController'
 contrail_controller='ContrailController'
 contrail_analytics_db='ContrailAnalyticsDatabase'
 contrail_analytics='ContrailAnalytics'
+#Init node reference variable
+class Node_ref:
+  openstack_director_ref = openstack_controller_ref = openstack_compute_0_ref = openstack_storage_0_ref = contrail_appformix_ref = contrail_controller_ref = contrail_analytics_db_ref = contrail_analytics_ref = 'init'
 
 #Functions
 def cmp_nodes(dc1_report_file, node_ref, node_ip, node_flavor):
@@ -44,37 +47,37 @@ def main ():
 
   #Delete any existing report file
   os.remove(dc1_report_file) if os.path.exists(dc1_report_file) else None
+  #Node reference class instance
+  os_node_ref = Node_ref()
 
   print '1.Create reference nodes from DC2'
-  #Init node reference variable
-  openstack_director_ref = openstack_controller_ref = openstack_compute_0_ref = openstack_storage_0_ref = contrail_appformix_ref = contrail_controller_ref = contrail_analytics_db_ref = contrail_analytics_ref = 'init'
   #Case to Check if the variable has been used already, if not, it will initilize it with the first node IP within the Flavor using dc2 nodes
   dc2_nodes_datas_dict = eval(open(dc2_input_file).read())
   for nodeip, nodeflavor in dc2_nodes_datas_dict.iteritems():
     if nodeflavor == openstack_director:
-      if openstack_director_ref == 'init':
-        openstack_director_ref = nodeip
+      if os_node_ref.openstack_director_ref == 'init':
+        os_node_ref.openstack_director_ref = nodeip
     elif nodeflavor == openstack_controller:
-      if openstack_controller_ref == 'init':
-        openstack_controller_ref = nodeip
+      if os_node_ref.openstack_controller_ref == 'init':
+        os_node_ref.openstack_controller_ref = nodeip
     elif nodeflavor == openstack_compute_0:
-      if openstack_compute_0_ref == 'init':
-        openstack_compute_0_ref = nodeip
+      if os_node_ref.openstack_compute_0_ref == 'init':
+        os_node_ref.openstack_compute_0_ref = nodeip
     elif nodeflavor == openstack_storage_0:
-      if openstack_storage_0_ref == 'init':
-        openstack_storage_0_ref = nodeip
+      if os_node_ref.openstack_storage_0_ref == 'init':
+        os_node_ref.openstack_storage_0_ref = nodeip
     elif nodeflavor == contrail_appformix:
-      if contrail_appformix_ref == 'init':
-        contrail_appformix_ref = nodeip
+      if os_node_ref.contrail_appformix_ref == 'init':
+        os_node_ref.contrail_appformix_ref = nodeip
     elif nodeflavor == contrail_controller:
-      if contrail_controller_ref == 'init':
-        contrail_controller_ref = nodeip
+      if os_node_ref.contrail_controller_ref == 'init':
+        os_node_ref.contrail_controller_ref = nodeip
     elif nodeflavor == contrail_analytics_db:
-      if contrail_analytics_db_ref == 'init':
-        contrail_analytics_db_ref = nodeip
+      if os_node_ref.contrail_analytics_db_ref == 'init':
+        os_node_ref.contrail_analytics_db_ref = nodeip
     elif nodeflavor == contrail_analytics:
-      if contrail_analytics_ref == 'init':
-        contrail_analytics_ref = nodeip
+      if os_node_ref.contrail_analytics_ref == 'init':
+        os_node_ref.contrail_analytics_ref = nodeip
     else: 
       print("Node reference creation failed, check the node flavors"), nodeip
 
@@ -82,21 +85,21 @@ def main ():
   dc1_nodes_datas_dict = eval(open(dc1_input_file).read())
   for nodeip, nodeflavor in dc1_nodes_datas_dict.iteritems():
     if nodeflavor == openstack_director:
-      cmp_nodes(dc1_report_file, openstack_director_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.openstack_director_ref, nodeip, nodeflavor)
     elif nodeflavor == openstack_controller:
-      cmp_nodes(dc1_report_file, openstack_controller_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.openstack_controller_ref, nodeip, nodeflavor)
     elif nodeflavor == openstack_compute_0:
-      cmp_nodes(dc1_report_file, openstack_compute_0_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.openstack_compute_0_ref, nodeip, nodeflavor)
     elif nodeflavor == openstack_storage_0:
-      cmp_nodes(dc1_report_file, openstack_storage_0_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.openstack_storage_0_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_appformix:
-      cmp_nodes(dc1_report_file, contrail_appformix_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.contrail_appformix_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_controller:
-      cmp_nodes(dc1_report_file, contrail_controller_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.contrail_controller_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_analytics_db:
-      cmp_nodes(dc1_report_file, contrail_analytics_db_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.contrail_analytics_db_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_analytics:
-      cmp_nodes(dc1_report_file, contrail_analytics_ref, nodeip, nodeflavor)
+      cmp_nodes(dc1_report_file, os_node_ref.contrail_analytics_ref, nodeip, nodeflavor)
     else: 
       print("Node comparison failed, check the node flavors"), nodeip
   print 'Report can be found here:', dc1_report_file
