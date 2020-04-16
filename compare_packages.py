@@ -30,6 +30,9 @@ contrail_appformix='AppformixController'
 contrail_controller='ContrailController'
 contrail_analytics_db='ContrailAnalyticsDatabase'
 contrail_analytics='ContrailAnalytics'
+#Init node reference variable
+class Node_ref:
+  openstack_director_ref = openstack_controller_ref = openstack_compute_0_ref = openstack_storage_0_ref = contrail_appformix_ref = contrail_controller_ref = contrail_analytics_db_ref = contrail_analytics_ref = 'init'
 
 #Functions
 def get_nodes_datas(getnodeinfo_cmd):
@@ -96,42 +99,42 @@ def main ():
   dict_update_export()
 
   print '4.Comparing datas between node flavors'
-  #Init node reference variable
-  openstack_director_ref = openstack_controller_ref = openstack_compute_0_ref = openstack_storage_0_ref = contrail_appformix_ref = contrail_controller_ref = contrail_analytics_db_ref = contrail_analytics_ref = 'init'
+  #Node reference class instance
+  os_node_ref = Node_ref()
   #Case like loop to compare each node per type
   for nodeip, nodeflavor in nodes_datas_dict.iteritems():
     if nodeflavor == openstack_director:
-      if openstack_director_ref == 'init':
-        openstack_director_ref = nodeip
-      cmp_nodes(report_file, openstack_director_ref, nodeip, nodeflavor)
+      if os_node_ref.openstack_director_ref == 'init':
+        os_node_ref.openstack_director_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.openstack_director_ref, nodeip, nodeflavor)
     elif nodeflavor == openstack_controller:
-      if openstack_controller_ref == 'init':
-        openstack_controller_ref = nodeip
-      cmp_nodes(report_file, openstack_controller_ref, nodeip, nodeflavor)
+      if os_node_ref.openstack_controller_ref == 'init':
+        os_node_ref.openstack_controller_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.openstack_controller_ref, nodeip, nodeflavor)
     elif nodeflavor == openstack_compute_0:
-      if openstack_compute_0_ref == 'init':
-        openstack_compute_0_ref = nodeip
-      cmp_nodes(report_file, openstack_compute_0_ref, nodeip, nodeflavor)
+      if os_node_ref.openstack_compute_0_ref == 'init':
+        os_node_ref.openstack_compute_0_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.openstack_compute_0_ref, nodeip, nodeflavor)
     elif nodeflavor == openstack_storage_0:
-      if openstack_storage_0_ref == 'init':
-        openstack_storage_0_ref = nodeip
-      cmp_nodes(report_file, openstack_storage_0_ref, nodeip, nodeflavor)
+      if os_node_ref.openstack_storage_0_ref == 'init':
+        os_node_ref.openstack_storage_0_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.openstack_storage_0_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_appformix:
-      if contrail_appformix_ref == 'init':
-        contrail_appformix_ref = nodeip
-      cmp_nodes(report_file, contrail_appformix_ref, nodeip, nodeflavor)
+      if os_node_ref.contrail_appformix_ref == 'init':
+        os_node_ref.contrail_appformix_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.contrail_appformix_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_controller:
-      if contrail_controller_ref == 'init':
-        contrail_controller_ref = nodeip
-      cmp_nodes(report_file, contrail_controller_ref, nodeip, nodeflavor)
+      if os_node_ref.contrail_controller_ref == 'init':
+        os_node_ref.contrail_controller_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.contrail_controller_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_analytics_db:
-      if contrail_analytics_db_ref == 'init':
-        contrail_analytics_db_ref = nodeip
-      cmp_nodes(report_file, contrail_analytics_db_ref, nodeip, nodeflavor)
+      if os_node_ref.contrail_analytics_db_ref == 'init':
+        os_node_ref.contrail_analytics_db_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.contrail_analytics_db_ref, nodeip, nodeflavor)
     elif nodeflavor == contrail_analytics:
-      if contrail_analytics_ref == 'init':
-        contrail_analytics_ref = nodeip
-      cmp_nodes(report_file, contrail_analytics_ref, nodeip, nodeflavor)
+      if os_node_ref.contrail_analytics_ref == 'init':
+        os_node_ref.contrail_analytics_ref = nodeip
+      cmp_nodes(report_file, os_node_ref.contrail_analytics_ref, nodeip, nodeflavor)
     else: 
       print("Node comparison failed, check the node flavors: "), nodeip
   print "Report can be found here:", report_file
