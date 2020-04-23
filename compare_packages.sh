@@ -16,8 +16,8 @@ arrays="IP_NodeFlavor_Array Director_IP_array Controller_IP_array Compute_0_IP_a
 
 #Each type of node needs its OpenStack Flavor
 openstack_director=Director
-openstack_controller=baremetal
-openstack_compute_0=baremetal-extra
+openstack_controller=Controller
+openstack_compute_0=ComputeDpdkHw0
 openstack_storage_0=CephStorage10Hw5
 contrail_appformix=AppformixController
 contrail_controller=ContrailController
